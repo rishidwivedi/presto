@@ -71,8 +71,10 @@ import static com.facebook.presto.sql.analyzer.SemanticErrorCode.INVALID_SCHEMA_
 import static com.facebook.presto.sql.analyzer.SemanticErrorCode.MISSING_TABLE;
 import static com.facebook.presto.sql.analyzer.SemanticErrorCode.NOT_SUPPORTED;
 import static com.facebook.presto.sql.analyzer.SemanticErrorCode.TABLE_ALREADY_EXISTS;
+import static com.facebook.presto.sql.tree.ExplainFormat.Type.JSON;
 import static com.facebook.presto.sql.tree.ExplainFormat.Type.TEXT;
 import static com.facebook.presto.sql.tree.ExplainType.Type.LOGICAL;
+import static com.facebook.presto.sql.tree.ExplainType.Type.SOURCE;
 import static com.facebook.presto.sql.tree.QueryUtil.aliasedName;
 import static com.facebook.presto.sql.tree.QueryUtil.ascending;
 import static com.facebook.presto.sql.tree.QueryUtil.caseWhen;
@@ -433,6 +435,10 @@ class StatementAnalyzer
                 break;
             }
         }
+
+        // source and json should always come together
+        checkState(!(planType == SOURCE ^ planFormat == JSON));
+
         String queryPlan = getQueryPlan(node, planType, planFormat);
 
         Query query = new Query(
@@ -461,6 +467,8 @@ class StatementAnalyzer
                 return queryExplainer.get().getGraphvizPlan(node.getStatement(), planType);
             case TEXT:
                 return queryExplainer.get().getPlan(node.getStatement(), planType);
+            case JSON:
+                return queryExplainer.get().getJsonPlan(node.getStatement(), planType);
         }
         throw new IllegalArgumentException("Invalid Explain Format: " + planFormat.toString());
     }

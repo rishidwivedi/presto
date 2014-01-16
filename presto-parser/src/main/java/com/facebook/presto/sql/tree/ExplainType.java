@@ -23,7 +23,8 @@ public class ExplainType
     public enum Type
     {
         LOGICAL,
-        DISTRIBUTED
+        DISTRIBUTED,
+        SOURCE
     }
 
     private final Type type;

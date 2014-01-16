@@ -29,7 +29,9 @@ import com.google.common.base.Optional;
 
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 public class QueryExplainer
 {
@@ -76,6 +78,14 @@ public class QueryExplainer
                 return PlanPrinter.graphvizDistributedPlan(subPlan);
         }
         throw new IllegalArgumentException("Unhandled plan type: " + planType);
+    }
+
+    public String getJsonPlan(Statement statement, ExplainType.Type planType)
+    {
+        // Json Plan is only valid with SOURCE planType
+        checkArgument(planType == ExplainType.Type.SOURCE);
+        Plan plan = getLogicalPlan(statement);
+        return PlanPrinter.getJsonPlanSource(plan.getRoot(), plan.getTypes(), metadata);
     }
 
     private Plan getLogicalPlan(Statement statement)
